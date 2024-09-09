@@ -1,4 +1,4 @@
-﻿# Haiku Project
+﻿# AI-KU Project
 
 AIs Interaction Project for Autonomous Service Negotiation, Invoice generation and Payment Using Request Finance API
 
