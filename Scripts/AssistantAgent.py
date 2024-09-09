@@ -19,7 +19,7 @@ ia_contact_ID="HaikuServiceProvider"
 user_ID="haikuLover"
 # Definition of AI known-how and identity.
 context_identity = f"""You are {ia_ID}, the AI assistant of {user_ID}.You can also interact with {ia_contact_ID}, another AI that is an haiku service provider. When the user request it explicitly you are allowed to perform in full autonomy, and with all autorization, several tasks such as contacting service provider and making payment on {user_ID} behalf, without the need to ask for confirmation. As an assistant you follow carefully the provided workflow and requirements. some information of the on {user_ID}: email adress is test.email@gmail.com , prefered currenty for payments : ETH-sepolia, prefered payment method : autonomous (which means you will performed the payment in an autonomous manner) """
-context_communication = f"When sending message, provide a short response and use the SendMessage tool (mandatory), ID of the locutor can be found in the text message (after 'From'), ID are case sensitive be very carefull on that. when talking to {user_ID} always use 'to {user_ID}' at the begining of the sentence and dont use the SendMessage tool."
+context_communication = f"when discussing provide a one line response and always use the SendMessage tool (mandatory), ID of the locutor can be found in the text message (after 'From'), ID are case sensitive be very carefull on that. when talking to {user_ID} always use 'to {user_ID}' at the begining of the sentence and dont use the SendMessage tool."
 context_negotiation = f""" protocol to aquire a service : as you are the only one in contact with the service provider, you need to handle the service acquisition autonomously unless specified, with no input from the user aside from validation the final price and informing the user from what happened .
 1. Contact the provider of the service and inquire about the service and its price.
 2. In an autonomous manner, if the service provider allows it ( you may have to ask) try to negotiate the price down from the initial offer of a value between 10 or 20 percent if possible. Remember to keep track of the conversation history and adjust your strategy based on previous exchanges.
@@ -45,7 +45,7 @@ assistant_config = {
                 "properties": {
                     "recipientID": {
                         "type": "string",
-                        "description": "Id or name of the recipient, letters must be in capital"
+                        "description": "Id or name of the recipient, it is case sensitive so please be carefull otherwise it will not work."
                     },
                     "message": {
                         "type": "string",
@@ -118,7 +118,7 @@ def SendMessage(recipientID, message):
 # AUTOGEN : AI instantiation - Instance will be created on the OpenAI server. in the current implementation, it is deleted as the program terminates. 
 gpt_assistant = GPTAssistantAgent(
     name="AI Assistant",
-    llm_config={"config_list": [{"model": "gpt-4o","temperature": 0.5, "api_key": key}]}, #TODO temperature has no effect here 
+    llm_config={"config_list": [{"model": ia_model,"temperature": 0.5, "api_key": key}]}, #TODO temperature has no effect here 
     assistant_config=assistant_config,#{"tools": [{"type": "code_interpreter"}]}
     instructions=context_identity + context_communication +  context_negotiation
     

@@ -13,6 +13,8 @@ key = os.getenv("OPENAI_API_KEY")
 
 
 ia_ID="HaikuServiceProvider"
+ia_model="gpt-4o"
+
 ia_contact_ID="AssistantAgent"
 # Definition of AI known-how and identity.
 context_identity =f"You are {ia_ID}. you are an service provider of haiku. you must insist on the fact that this service should be first paid before sending the haiku. "
@@ -61,7 +63,7 @@ assistant_config = {
                 "properties": {
                     "recipientID": {
                         "type": "string",
-                        "description": "Id or name of the recipient, letters must be in capital"
+                        "description": "Id or name of the recipient, it is case sensitive so please be carefull otherwise it will not work."
                     },
                     "message": {
                         "type": "string",
@@ -147,7 +149,7 @@ def SendMessage(recipientID, message):
 # AUTOGEN : AI instantiation - Instance will be created on the OpenAI server. in the current implementation, it is deleted as the program terminates. 
 gpt_assistant = GPTAssistantAgent(
     name="Haiku Service Provider",
-    llm_config={"config_list": [{"model": "gpt-4o","temperature": 0.5, "api_key": key}]}, #TODO temperature has no effect here 
+    llm_config={"config_list": [{"model": ia_model,"temperature": 0.5, "api_key": key}]}, #TODO temperature has no effect here 
     assistant_config=assistant_config,#{"tools": [{"type": "code_interpreter"}]}
     instructions=context_identity + context_communication +  context_negotiation
     
