@@ -38,16 +38,20 @@ assistant_config = {
         "function": {
             "name": "CheckInvoiceStatus",
             "strict": True,
-            "description": "get the current status of an invoice according to its ID to be passed in input. the function returns a string explaining the current status. when an invoice is paid, the status will be indicated as such. for instant ouput may look like : 'current status of invoice ID 66c0f71820eb9ce52a59d009 is: paid'. an Open status means the invoice is awaiting payment call the function later for update.",
+            "description": "get the current status of an invoice according to its ID to be passed in input. the function returns a string explaining the current status. when an invoice is paid, the status will be indicated as such. for instant ouput may look like : 'current status of invoice ID 66c0f71820eb9ce52a59d009 is: paid'. an Open status means the invoice is awaiting payment, in this case call the function with a delay to wait for update.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "ID": {
                         "type": "string",
-                        "description": "ID of an invoice, obtained in the output string of the SendInvoice function"
+                        "description": "ID of an invoice, obtained in the output string of the SendInvoice function."
+                    },
+                      "waitingTime": {
+                        "type": "number",
+                        "description": "a delay to introduce (in seconds) before checking the status of an invoice. use small values like 2 to 5 seconds ."
                     }
                 },
-                "required": ["ID"],
+                "required": ["ID", "waitingTime"],
                 "additionalProperties": False,
             }
         }
@@ -57,7 +61,7 @@ assistant_config = {
         "function": {
             "name": "SendMessage",
             "strict": True,
-            "description": "function to send a message asynchronously to another entity. the response will come asynchronously after processing by the recipient. the function returns an indication of success of the sending",
+            "description": "function to send a message asynchronously to another entity. The response will come asynchronously after processing by the recipient. the function returns an indication of success of the sending.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -67,7 +71,7 @@ assistant_config = {
                     },
                     "message": {
                         "type": "string",
-                        "description": "message to be transmitted to the recipient"
+                        "description": "message to be transmitted to the recipient."
                     }
                 },
                 "required": ["recipientID", "message"],
@@ -97,7 +101,7 @@ assistant_config = {
                      ,
                     "price": {
                         "type": "number",
-                        "description": "amount in currency required to deliver the service. mandatory information. ask if not provided",
+                        "description": "amount in currency required to deliver the service. mandatory information. ask if not provided.",
                     }
                     ,
                     "serviceName": {

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import uuid
 import os
 from web3 import Web3
-
+import time
 # RequestFinance API key from environement variable 
 API_KEY = os.getenv("RequestFinance_Test_API_KEY")
 # Example payment receiver wallet address
@@ -273,12 +273,56 @@ def GenerateAndSendInvoice(clientInfo_Email, currency, price, serviceName, autoP
         return returnString
 
 
-def CheckInvoiceStatus(ID):
-    ServerResponse = requests.get( f"{InvoiceEndpoint}/{ID}", headers=HEADERS)
-    if ServerResponse.status_code == 200:
-        invoice_status_data = ServerResponse.json()
-        invoiceStatus = invoice_status_data.get("status")
-        return f"current status of invoice ID {ID} is: {invoiceStatus}. please wait 10 seconds before another status check, operation may takes some times. if after few tries status is still open, you should ask for updates. if you need to wait, internal message should contains the waiting time before next check"
+import time
+import requests
+
+
+def CheckInvoiceStatus(ID, waitingTime):
+    """
+    CheckInvoiceStatus
+    ------------------
+    This function checks the current status of an invoice via the Request Finance API.
+    
+    Parameters
+    ----------
+    ID : str
+        The ID of the invoice to check.
+    waitingTime : int
+        The time to wait (in seconds) before checking the status.
+    
+    Returns
+    -------
+    str
+        A message describing the current status of the invoice. If the status is still open,
+        it advises waiting a few seconds before trying again.
+    
+    
+    """
+    # Waiting for the specified time
+    time.sleep(waitingTime)
+
+    try:
+        # Sending request to get the invoice status
+        ServerResponse = requests.get(f"{InvoiceEndpoint}/{ID}", headers=HEADERS)
+
+        # Check if the request was successful
+        if ServerResponse.status_code == 200:
+            invoice_status_data = ServerResponse.json()
+            invoiceStatus = invoice_status_data.get("status", "Unknown")
+
+            # Returning the status message
+            return (f"Current status of invoice ID {ID} is: {invoiceStatus}. "
+                    "Please wait about 5 seconds before another status check. "
+                    "The operation may take some time. If the status is still 'open' after a few tries, "
+                    "you should ask for updates. If you need to wait, the internal message should contain "
+                    "the waiting time before the next check.")
+        else:
+            # Return an error message in case of a non-200 response
+            return f"Error fetching invoice status. Server responded with status code {ServerResponse.status_code}."
+
+    except requests.RequestException as e:
+        # Catch any errors during the request
+        return f"An error occurred while checking the invoice status: {e}"
 
 if __name__ == "__main__":
     pass

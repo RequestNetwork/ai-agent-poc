@@ -68,7 +68,7 @@ assistant_config = {
                 "properties": {
                     "recipient_address": {
                         "type": "string",
-                        "description": "payment address of the receiver of the payment. should be in the form : 0x35d0e078755Cd84D3E0656cAaB417Dee1d7939c7 "
+                        "description": "payment address of the receiver of the payment. It must be provided by the service provider."
                     },
                     "amount_to_pay": {
                         "type": "number",

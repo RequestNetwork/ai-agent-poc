@@ -43,19 +43,13 @@ def PerformPayment(recipient_address, amount_to_pay, paymentRefence):
     Notes
     -----
     - The function interacts with a smart contract that uses a method `transferWithReferenceAndFee`.
-    - The fee for this transaction is set to 0, as indicated by the `fee_amount`.
+    - The fee for this transaction is set to 0.
     - The transaction is signed locally with the provided private key and sent to the blockchain.
     - The function waits for the transaction receipt to confirm whether the transaction succeeded or failed.
-    
-    Example
-    -------
-    result = PerformPayment(
-        recipient_address="0xRecipientAddress",
-        amount_to_pay=0.1,
-        paymentRefence="ref123"
-    )
-    print(result)
+   
     """  
+    if recipient_address is None : 
+        return "Error , a valid recipient_address should be provided."
     # Initialize the smart contract with address and ABI
     contract_instance = web3Connex.eth.contract(address=contract_address, abi=ABI_json)
 
