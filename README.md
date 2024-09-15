@@ -26,7 +26,7 @@ in the following, all the required key could be saved in your system environemen
 Before starting the web_interface.py, start your Redis server.  
 then start the two agent flask web servers AssistantAgent and ServiceProviderAgent. 
 
-using you web browser, go to the web_interface url  to access the interface. 
+Using you web browser, go to the web_interface url  to access the interface. 
 
 It may happens that the communication protocol between AI may not be respected, restarting the script should be sufficient to solve the issue. 
 
