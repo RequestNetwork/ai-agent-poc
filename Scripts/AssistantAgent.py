@@ -12,23 +12,40 @@ app = Flask(__name__)
 # Get OpenAI API key from environement variable
 key = os.getenv("OPENAI_API_KEY")
 
-ia_ID="AssistantAgent"
-ia_model="gpt-4o"
+ia_ID = "AssistantAgent"
+ia_model = "gpt-4o"
 
-ia_contact_ID="HaikuServiceProvider"
-user_ID="haikuLover"
+ia_contact_ID = "HaikuServiceProvider"
+user_ID = "haikuLover"
 # Definition of AI known-how and identity.
-context_identity = f"""You are {ia_ID}, the AI assistant of {user_ID}.You can also interact with {ia_contact_ID}, another AI that is an haiku service provider. When the user request it explicitly you are allowed to perform in full autonomy, and with all autorization, several tasks such as contacting service provider and making payment on {user_ID} behalf, without the need to ask for confirmation. As an assistant you follow carefully the provided workflow and requirements. some information of the on {user_ID}: email adress is test.email@gmail.com , prefered currenty for payments : ETH-sepolia, prefered payment method : autonomous (which means you will performed the payment in an autonomous manner) """
-context_communication = f"when discussing provide a one line response and always use the SendMessage tool (mandatory), ID of the locutor can be found in the text message (after 'From'), ID are case sensitive be very carefull on that. when talking to {user_ID} always use 'to {user_ID}' at the begining of the sentence and dont use the SendMessage tool."
-context_negotiation = f""" protocol to aquire a service : as you are the only one in contact with the service provider, you need to handle the service acquisition autonomously unless specified, with no input from the user aside from validation the final price and informing the user from what happened .
+context_identity = f"""You are {ia_ID}, the AI assistant of {user_ID}. You can also interact with {ia_contact_ID}, another AI that is a haiku service provider.
+When the user requests it explicitly, you are allowed to perform in full autonomy, and with all authorization, several tasks such as contacting service providers and making payments on {user_ID}'s behalf, without the need to ask for confirmation.
+As an assistant, you follow carefully the provided workflow and requirements. Some information on {user_ID}: email address is test.email@gmail.com, preferred currency for payments: ETH-sepolia,
+preferred payment method: autonomous (which means you will perform the payment in an autonomous manner)."""
+
+context_communication = f"""When communicating with any entity other than {user_ID}, you must always:
+
+- Provide a one-line response.
+- Use the SendMessage tool. This is mandatory.
+
+The ID of the interlocutor can be found in the text message (after 'From'); IDs are case-sensitive, so be very careful with that.
+
+When talking to {user_ID}, you must:
+
+- Not use the SendMessage tool.
+- Always start your messages with 'to {user_ID}' at the beginning of the sentence."""
+
+context_negotiation = f"""Protocol to acquire a service: As you are the only one in contact with the service provider, you need to handle the service acquisition autonomously unless specified, with no input from the user aside from validating the final price and informing the user about what happened.
 1. Contact the provider of the service and inquire about the service and its price.
-2. In an autonomous manner, if the service provider allows it ( you may have to ask) try to negotiate the price down from the initial offer of a value between 10 or 20 percent if possible. Remember to keep track of the conversation history and adjust your strategy based on previous exchanges.
-3. you may have to perform several negotiation turns. your objective is to lower the price to make the user pay the less.
-4. Once a agreement is reached, inform the service provider that you accept the current offer and wait for the creation of an invoice. you must first provide all of the following information before validating the offer: email adress of {user_ID}, the prefered currenty and the final price you agreed on. 
-5. payment can be done in two way depending on {user_ID} preferences. if {user_ID} doesn't inform you of prefered mode of payment you must assume you must process autonomously and pay using the provided tool. autonomous payment: when accept the current offer you must in the same sentence inform the service provider that you need the payment reference and payment receipient address. Manual payment : inform the service provide you will need an url for manual payment. Based on the url provided by the service provided, {user_ID} will manually perform the payment and confirm it to you.Finally, you will be able to inform the service provider that the payment has been made.
-6. if the payment doesn't appear as paid, it may requires some times such that all the process is performed. ask the service provider to check again in few seconds. repeat until the provider inform you that the transaction is a success. 
-you must follow this process.
+2. In an autonomous manner, if the service provider allows it (you may have to ask), try to negotiate the price down from the initial offer by a value between 10 and 20 percent if possible. Remember to keep track of the conversation history and adjust your strategy based on previous exchanges.
+3. You may have to perform several negotiation rounds. Your objective is to lower the price to make the user pay the least.
+4. Once an agreement is reached, inform the service provider that you accept the current offer and wait for the creation of an invoice. You must first provide all of the following information before validating the offer: email address of {user_ID}, the preferred currency, and the final price you agreed on.
+5. Payment can be done in two ways depending on {user_ID}'s preferences. If {user_ID} doesn't inform you of the preferred mode of payment, you must assume you need to process autonomously and pay using the provided tool. Autonomous payment: When you accept the current offer, you must in the same sentence inform the service provider that you need the payment reference and payment recipient address, this is mandatory. Manual payment: Inform the service provider you will need a URL for manual payment. Based on the URL provided by the service provider, {user_ID} will manually perform the payment and confirm it to you. Finally, you will be able to inform the service provider that the payment has been made.
+6. If the payment doesn't appear as paid, it may require some time for the process to complete. Ask the service provider to check again in a few seconds. Repeat until the provider informs you that the transaction is a success.
+You must follow this process.
+
 """
+
 
 
 # Definition of the tools and their description that could be used by the AI.
@@ -109,7 +126,7 @@ def SendMessage(recipientID, message):
     """
     r.lpush(f'{recipientID}_queue', f"From {ia_ID} : "+ message)
     # logs 
-    log_to_redis(ia_ID,f"to {recipientID} : {message}")
+    log_to_redis(ia_ID, f"to {recipientID} : {message}")
     return  f"Message Sent to {recipientID}"
 
 
@@ -117,25 +134,25 @@ def SendMessage(recipientID, message):
 
 # AUTOGEN : AI instantiation - Instance will be created on the OpenAI server. in the current implementation, it is deleted as the program terminates. 
 gpt_assistant = GPTAssistantAgent(
-    name="AI Assistant",
-    llm_config={"config_list": [{"model": ia_model,"temperature": 0.5, "api_key": key}]}, #TODO temperature has no effect here 
-    assistant_config=assistant_config,#{"tools": [{"type": "code_interpreter"}]}
-    instructions=context_identity + context_communication +  context_negotiation
+    name = "AI Assistant",
+    llm_config = {"config_list": [{"model": ia_model, "temperature": 0.7, "api_key": key}] }, 
+    assistant_config = assistant_config,#{"tools": [{"type": "code_interpreter"}]}
+    instructions = context_identity + context_communication +  context_negotiation,
     
 )
 
 
-# AUTOGEN : Configuration of the UserProxy agent that will interact with the GPTAssistantAgent instance locally
+# AUTOGEN : Configuration of the UserProxy agent that will interact with the GPTAssistantAgent instance
 user_proxy = UserProxyAgent(
-    name="user_proxy",
-    code_execution_config={"use_docker": False},
-    human_input_mode="NEVER",  # Permet à l'utilisateur de saisir des messages
-    max_consecutive_auto_reply=0 
+    name = "user_proxy",
+    code_execution_config = {"use_docker": False},
+    human_input_mode = "NEVER", 
+    max_consecutive_auto_reply = 0 
    
 )
 # Registering defined functions for the AI Agent
 gpt_assistant.register_function(
-    function_map={
+    function_map = {
         "SendMessage" : SendMessage,
         "PerformPayment" : WM.PerformPayment
     }
@@ -143,7 +160,7 @@ gpt_assistant.register_function(
 
 
 # Initialize Redis connexion to access message channels 
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(host='localhost', port = 6379, db = 0)
 # Log message to build a conversation history and monitor it on a web interface 
 def log_to_redis(agent, message):
     """
@@ -165,6 +182,7 @@ def log_to_redis(agent, message):
     timestamp = datetime.now().isoformat()
     log_entry = {'timestamp': timestamp, 'agent': agent, 'message': message}
     r.lpush('conversation_logs', str(log_entry))
+
 # Main function to send a prompt to the AI and get the generated response
 def query_openai(prompt):
     """
@@ -182,7 +200,7 @@ def query_openai(prompt):
     str
         The AI-generated response text, stripped of leading/trailing spaces.
     """
-    response = user_proxy.initiate_chat(gpt_assistant, message=prompt, clear_history=False)
+    response = user_proxy.initiate_chat(gpt_assistant, message = prompt, clear_history = False)
     chat_history = response.chat_history[-1]['content']
     return chat_history.strip()
 
@@ -281,4 +299,4 @@ def delete_assistant():
 atexit.register(delete_assistant)
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port = 5000)

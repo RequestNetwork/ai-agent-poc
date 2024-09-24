@@ -51,14 +51,14 @@ def PerformPayment(recipient_address, amount_to_pay, paymentRefence):
     if recipient_address is None : 
         return "Error , a valid recipient_address should be provided."
     # Initialize the smart contract with address and ABI
-    contract_instance = web3Connex.eth.contract(address=contract_address, abi=ABI_json)
+    contract_instance = web3Connex.eth.contract(address = contract_address, abi = ABI_json)
 
     # Convert the ETH amount to Wei (smallest unit of ETH)
     eth_value = amount_to_pay
     fee_amount = 0 # No fee for this transaction
     amount_to_send = web3Connex.to_wei(eth_value, 'ether')
    
-    paymentReference_bytes =log_topic_to_bytes(paymentRefence) # Convert payment reference to bytes
+    paymentReference_bytes  = log_topic_to_bytes(paymentRefence) # Convert payment reference to bytes
 
     # Build the transaction
     txn = contract_instance.functions.transferWithReferenceAndFee(

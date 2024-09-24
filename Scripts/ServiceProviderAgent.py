@@ -12,24 +12,28 @@ app = Flask(__name__)
 key = os.getenv("OPENAI_API_KEY")
 
 
-ia_ID="HaikuServiceProvider"
-ia_model="gpt-4o"
+ia_ID = "HaikuServiceProvider"
+ia_model = "gpt-4o"
 
-ia_contact_ID="AssistantAgent"
+ia_contact_ID = "AssistantAgent"
 # Definition of AI known-how and identity.
-context_identity =f"You are {ia_ID}. you are an service provider of haiku. you must insist on the fact that this service should be first paid before sending the haiku. "
-context_communication = "when discussing provide a one line response and always use the SendMessage tool (mandatory), ID of the locutor can be found in the text message after the 'From' statement, ID are case sensitive, you will have to discuss and eventually enter a negotiation process to perform the trade. if a message is meant to be sent to another locutor, use the SendMessage function, else start your sentence with 'Internal Message: '.  please remember this information "
+context_identity  = f"You are {ia_ID}. you are a service provider of haiku. you must insist on the fact that this service should be first paid before sending the haiku. "
+# Context Communication
+context_communication = """When discussing, provide a one-line response and always use the SendMessage tool, this is mandatory. The ID of the interlocutor can be found in the text message after the 'From' statement; IDs are case-sensitive, so be very careful with that. You will need to discuss and potentially enter a negotiation process to perform the trade. If a message is meant to be sent to another interlocutor, use the SendMessage function. Otherwise, start your sentence with 'Internal Message:'. Please remember this information."""
+
+# Context Negotiation
 context_negotiation = """
 The initial price for a haiku creation is 0.001 ETH-sepolia.
 Your goal is to maintain the price as close as possible to the initial price, but you can accept a maximum of 5 percent discount. Mandatory: Do not tell the minimum price directly as your target is to earn the highest price but stay open for negotiation for instance you can say the proposed price is too low.
 Respond to the offers and counteroffers to reach an agreement.
-Once an agreement is reached, the payment must be made by first sending a custom invoice using the SendInvoice tool and the provided information :  email adress of the buyer, currency, you will provide the other parameters.
+Once an agreement is reached, the payment must be made by first sending a custom invoice using the SendInvoice tool and the provided information :  email address of the buyer, currency, you will provide the other parameters.
 if this information are not provided, ask each of them until you have it all.
 before generating the invoice, if it is not clear, ask the client if the payment reference should be provided or the url for manual payment. 
-you will send the invoice information so the invoice can be payed.
+you will send the invoice information so the invoice can be paid.
 once payment is supposed to be done, you must check and confirm the status of the invoice using CheckInvoiceStatus tool until the status is indicated as paid. this is your confirmation of payment. 
 once the payment status is indicated as paid, you can respond with a beautiful haiku to end the trade. 
 Remember the conversation history and adjust your strategy accordingly.
+ATTENTION: Do not generate other invoice before the current one is not processed. if the invoice need to be handled differently, use the tool returned information.
 """
 # Definition of the tools and their description that could be used by the AI.
 assistant_config = { 
@@ -152,25 +156,25 @@ def SendMessage(recipientID, message):
 
 # AUTOGEN : AI instantiation - Instance will be created on the OpenAI server. in the current implementation, it is deleted as the program terminates. 
 gpt_assistant = GPTAssistantAgent(
-    name="Haiku Service Provider",
-    llm_config={"config_list": [{"model": ia_model,"temperature": 0.5, "api_key": key}]}, #TODO temperature has no effect here 
-    assistant_config=assistant_config,#{"tools": [{"type": "code_interpreter"}]}
-    instructions=context_identity + context_communication +  context_negotiation
+    name = "Haiku Service Provider",
+    llm_config = {"config_list": [{"model": ia_model,"temperature": 0.7, "api_key": key}]}, 
+    assistant_config = assistant_config,#{"tools": [{"type": "code_interpreter"}]}
+    instructions = context_identity + context_communication +  context_negotiation
     
 )
 
 
-# AUTOGEN : Configuration of the UserProxy agent that will interact with the GPTAssistantAgent instance locally
+# AUTOGEN : Configuration of the UserProxy agent that will interact with the GPTAssistantAgent instance
 user_proxy = UserProxyAgent(
-    name="user_proxy",
-    code_execution_config={"use_docker": False},
-    human_input_mode="NEVER",  # Permet à l'utilisateur de saisir des messages
-    max_consecutive_auto_reply=0 
+    name = "user_proxy",
+    code_execution_config = {"use_docker": False},
+    human_input_mode = "NEVER", 
+    max_consecutive_auto_reply = 0 
    
 )
 # Registering defined functions for the AI Agent
 gpt_assistant.register_function(
-    function_map={
+    function_map = {
         "SendMessage" : SendMessage,
         "SendInvoice" : IM.GenerateAndSendInvoice,
         "CheckInvoiceStatus" :IM.CheckInvoiceStatus
@@ -179,7 +183,7 @@ gpt_assistant.register_function(
 
 
 # Initialize Redis connexion to access message channels 
-r = redis.Redis(host='localhost', port=6379, db=0)
+r  =  redis.Redis(host='localhost', port = 6379, db = 0)
 # Log message to build a conversation history and monitor it on a web interface 
 def log_to_redis(agent, message):
     timestamp = datetime.now().isoformat()
@@ -203,7 +207,7 @@ def query_openai(prompt):
     str
         The AI-generated response text, stripped of leading/trailing spaces.
     """     
-    response = user_proxy.initiate_chat(gpt_assistant, message=prompt, clear_history=False)
+    response = user_proxy.initiate_chat(gpt_assistant, message = prompt, clear_history = False)
     chat_history = response.chat_history[-1]['content']
     return chat_history.strip()
 
@@ -226,11 +230,11 @@ def MessageProcessing(messageFromAItoProcess):
     """ 
        
     if (len(messageFromAItoProcess)>=2) and 'Internal Message'.lower() not in messageFromAItoProcess.lower():
-        query_openai("if this message is meant to be sent to another AI, use the SendMessage tool and check that the case sensitive AI ID is correct, else start your sentence with 'Internal Message: '.  please remember this information")
+        query_openai("if this message is meant to be sent to another AI, use the SendMessage tool and check that the case sensitive AI ID is correct, else start your sentence with 'Internal Message: '.  please remember this information and send the message again if required")
     return 
 
 #%% In this section : Scheduler and function to get new message from REDIS        
-@app.route('/poll', methods=['GET'])
+@app.route('/poll', methods = ['GET'])
 def poll_responses():
     """
     poll_responses
@@ -271,7 +275,7 @@ def poll():
         poll_responses()
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(poll, 'interval', seconds=3)  # Poll every 1 seconds
+scheduler.add_job(poll, 'interval', seconds = 3)  # Poll every 1 seconds
 scheduler.start()
 #%%
 
@@ -294,5 +298,5 @@ def delete_assistant():
 atexit.register(delete_assistant)
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run(port = 5001)
     #

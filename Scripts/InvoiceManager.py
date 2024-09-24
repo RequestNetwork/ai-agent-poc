@@ -240,11 +240,11 @@ def GenerateAndSendInvoice(clientInfo_Email, currency, price, serviceName, autoP
     )
     print(result)
     """
-    clientInfo={}
+    clientInfo = {}
     if clientInfo_Email is None :
         return "Email of the client is missing"
     else: 
-        clientInfo["email"] = clientInfo_Email
+        clientInfo["email"]  =  clientInfo_Email
 
     if currency is None :
         return "Currency information is missing. value is commonly ETH"
@@ -259,12 +259,12 @@ def GenerateAndSendInvoice(clientInfo_Email, currency, price, serviceName, autoP
         return "error in generating invoice, verify your data and try again"
     else: 
         if autoPayment:
-            ServerResponseWithReference = requests.get( "https://api.request.finance/invoices/"+str(invoice_ID)+"?withRequest=true", headers=HEADERS)
+            ServerResponseWithReference = requests.get( "https://api.request.finance/invoices/"+str(invoice_ID)+"?withRequest=true", headers = HEADERS)
             invoice_data = ServerResponseWithReference.json()
             salt = invoice_data["request"]["requestInput"]["payment"]["salt"]
             request_id = invoice_data.get("requestId")
-            payment_receiver= paymentReceiverAddress
-            payment_reference_hex= computePaymentReference(salt, request_id, payment_receiver)
+            payment_receiver =  paymentReceiverAddress
+            payment_reference_hex =  computePaymentReference(salt, request_id, payment_receiver)
 
             returnString = f"the client can use this payment Reference to perform payment: {payment_reference_hex} to the following address  {payment_receiver}. ID of the invoice is {invoice_ID} and is only for you, you can use it to check the status of payment. If user request or need to pay manually you can provide the following url : {signUpAndPayLink}"
         else:
@@ -303,7 +303,7 @@ def CheckInvoiceStatus(ID, waitingTime):
 
     try:
         # Sending request to get the invoice status
-        ServerResponse = requests.get(f"{InvoiceEndpoint}/{ID}", headers=HEADERS)
+        ServerResponse = requests.get(f"{InvoiceEndpoint}/{ID}", headers = HEADERS)
 
         # Check if the request was successful
         if ServerResponse.status_code == 200:

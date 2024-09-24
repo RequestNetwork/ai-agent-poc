@@ -3,10 +3,10 @@ import redis
 import requests
 from datetime import datetime
 app = Flask(__name__)
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(host='localhost', port = 6379, db = 0)
 conversation_logs=[]
-user_ID="haikuLover"
-ia_Assistant_ID="AssistantAgent"
+user_ID = "haikuLover"
+ia_Assistant_ID = "AssistantAgent"
 
 def log_to_redis(agent, message):
     timestamp = datetime.now().isoformat()
@@ -20,21 +20,21 @@ def index():
 
 @app.route('/logs', methods=['GET'])
 def get_logs():
-    logs = [eval(log.decode()) for log in r.lrange('conversation_logs', 0, -1)]
+    logs  =  [eval(log.decode()) for log in r.lrange('conversation_logs', 0, -1)]
     return jsonify(logs)
 
-@app.route('/clearlog', methods=['POST'])
+@app.route('/clearlog', methods = ['POST'])
 def ClearLogs():
     data = request.json  
     action = data.get('action')
-    results=r.flushall()
+    results = r.flushall()
     if results: 
         return jsonify({"Action": "log cleared"}), 200
     else:
         return jsonify({"Action": "log clear error"}), 400
    
 
-@app.route('/start', methods=['POST'])
+@app.route('/start', methods = ['POST'])
 def start_communication():
     user_message = request.json['message']
     print(f"user_message:{user_message}")
@@ -43,7 +43,7 @@ def start_communication():
     r.lpush(f'{ia_Assistant_ID}_queue', user_prompt)    
     return jsonify({'status': 'AIQuery'})
     
-@app.route('/log', methods=['POST'])
+@app.route('/log', methods = ['POST'])
 def log_message():
     data = request.get_json()
     conversation_logs.append(data)
