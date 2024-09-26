@@ -10,7 +10,8 @@ API_KEY = os.getenv("RequestFinance_Test_API_KEY")
 # Example payment receiver wallet address
 paymentReceiverAddress= os.getenv("paymentReceiverAddress")
 # Base URL Request Finance API - used for the POST / GET methods
-BASE_URL = "https://api.request.finance/"
+# BASE_URL = "https://api.request.finance/"
+BASE_URL = "http://localhost:3000/"
 
 # Invoice creation access point
 InvoiceEndpoint = f"{BASE_URL}invoices"
@@ -78,7 +79,7 @@ def GeneratePayload(clientInfo, currency, price, serviceName = None):
     Parameters
     ----------
     clientInfo : dict
-        Dictionary containing the client's information, including the email address.
+        Dictionary containing the client's information, including the email address and the identity address.
         Example: {"email": "client@example.com"}
     currency : str
         The currency of the invoice. Can be 'ETH-sepolia' or a custom currency. 
@@ -112,39 +113,40 @@ def GeneratePayload(clientInfo, currency, price, serviceName = None):
     )
     """
     invoice_payload = {
-        "invoiceItems": [
-            {
-                "currency": currency or "ETH-sepolia",  #  (SepoliaETH)
-                "name": serviceName or "AI Haiku Service",  # Nom du service
-                "quantity": 1,  # Quantité de service
-                "unitPrice": str(int(price * 10**18)),  # unit price in Wei
-            }
-        ],
-        "invoiceNumber":  f"{uuid.uuid4()}",  # unique invoice number
-        "buyerInfo": {
-            # "address": {
-            #     "streetAddress": "123 Blockchain Lane",
-            #     "extendedAddress": "",
-            #     "city": "Cryptoville",
-            #     "postalCode": "10001",
-            #     "region": "Crypto State",
-            #     "country": "US"
-            # },
-            "email": clientInfo["email"],
-            #"firstName": clientInfo["firstName"],
-            # "lastName": "Doe",
+        "payerAddress": clientInfo["identity-address"],  # Adress which will receive the payment
+        "contentdata": {
+            "invoiceItems": [
+                {
+                    "currency": currency or "ETH-sepolia",  #  (SepoliaETH)
+                    "name": serviceName or "AI Haiku Service",  # Nom du service
+                    "quantity": 1,  # Quantité de service
+                    "unitPrice": str(int(price * 10**18)),  # unit price in Wei
+                }
+            ],
+            "invoiceNumber":  f"{uuid.uuid4()}",  # unique invoice number
+            "buyerInfo": {
+                # "address": {
+                #     "streetAddress": "123 Blockchain Lane",
+                #     "extendedAddress": "",
+                #     "city": "Cryptoville",
+                #     "postalCode": "10001",
+                #     "region": "Crypto State",
+                #     "country": "US"
+                # },
+                "email": clientInfo["email"],
+                #"firstName": clientInfo["firstName"],
+                # "lastName": "Doe",
+            },
         },
         # "paymentTerms": {
         #     "dueDate": (datetime.utcnow() + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")  # Date d'échéance dans 7 jours
         # },
         "paymentAddress": paymentReceiverAddress,  # Adress which will receive the payment
-        "paymentCurrency": "ETH-sepolia",  # in agreement with  https://api.request.finance/currency/list/invoicing
+        "expectedAmount": str(int(price * 10**18)),
+        "currency": "ETH-sepolia", 
     }
-        
+
     return invoice_payload
-
-# Détails de la facture
-
 
      
 
@@ -169,7 +171,7 @@ def Send_invoice(invoice_payload):
     
     Notes
     -----
-    The function first sends a POST request to create an off-chain invoice. If successful, it retrieves the `invoice_ID`
+    The function first sends a POST request to create an off-chain invoice. If successful, it retrieves the `requestId`
     and sends another request to convert the off-chain invoice to an on-chain request. 
     If any of the requests fail, the function returns None.
     """
@@ -178,23 +180,14 @@ def Send_invoice(invoice_payload):
 
     if response.status_code == 201:
         response_data = response.json()
-        invoice_ID=response_data.get("id")
-
-        if invoice_ID is not None:
-            # Converts off-chain invoice into on-chain request
-            ServerResponse = requests.post( f"{InvoiceEndpoint}/{invoice_ID}", headers=HEADERS)
-            if ServerResponse.status_code == 201:
-                ServerResponse_data = ServerResponse.json()
-                return ServerResponse_data.get("invoiceLinks")["signUpAndPay"], invoice_ID
-            else: 
-                return None
-        else:
-            return None
+        requestId=response_data.get("id")
+        paymentReference=response_data.get("paymentReference")
+        return 'https://invoicing.request.network/', requestId, paymentReference;
     else:
         return None #f"Error during the creation of the invoice, please check the inputs. Error was : {response.content}"
 
 
-def GenerateAndSendInvoice(clientInfo_Email, currency, price, serviceName, autoPayment):
+def GenerateAndSendInvoice(clientInfo_Email, clientInfo_identity_address, currency, price, serviceName, autoPayment):
     """
     GenerateAndSendInvoice
     ----------------------
@@ -246,6 +239,11 @@ def GenerateAndSendInvoice(clientInfo_Email, currency, price, serviceName, autoP
     else: 
         clientInfo["email"]  =  clientInfo_Email
 
+    if clientInfo_identity_address is None :
+        return "Identity address of the client is missing"
+    else: 
+        clientInfo["identity-address"]  =  clientInfo_identity_address
+
     if currency is None :
         return "Currency information is missing. value is commonly ETH"
     if price is None :
@@ -253,22 +251,22 @@ def GenerateAndSendInvoice(clientInfo_Email, currency, price, serviceName, autoP
     
     
     invoice_payload = GeneratePayload(clientInfo, currency, price, serviceName)
-    signUpAndPayLink,  invoice_ID = Send_invoice(invoice_payload)
+    payLink, requestId, paymentReference = Send_invoice(invoice_payload)
     
-    if signUpAndPayLink is None: 
+    if payLink is None: 
         return "error in generating invoice, verify your data and try again"
     else: 
         if autoPayment:
-            ServerResponseWithReference = requests.get( "https://api.request.finance/invoices/"+str(invoice_ID)+"?withRequest=true", headers = HEADERS)
-            invoice_data = ServerResponseWithReference.json()
-            salt = invoice_data["request"]["requestInput"]["payment"]["salt"]
-            request_id = invoice_data.get("requestId")
-            payment_receiver =  paymentReceiverAddress
-            payment_reference_hex =  computePaymentReference(salt, request_id, payment_receiver)
+            # ServerResponseWithReference = requests.get( "https://api.request.finance/invoices/"+str(requestId)+"?withRequest=true", headers = HEADERS)
+            # invoice_data = ServerResponseWithReference.json()
+            # salt = invoice_data["request"]["requestInput"]["payment"]["salt"]
+            # request_id = invoice_data.get("requestId")
+            # payment_receiver =  paymentReceiverAddress
+            # payment_reference_hex =  computePaymentReference(salt, request_id, payment_receiver)
 
-            returnString = f"the client can use this payment Reference to perform payment: {payment_reference_hex} to the following address  {payment_receiver}. ID of the invoice is {invoice_ID} and is only for you, you can use it to check the status of payment. If user request or need to pay manually you can provide the following url : {signUpAndPayLink}"
+            returnString = f"the client can use this payment Reference to perform payment: {paymentReference} to the following address {paymentReceiverAddress}. ID of the invoice is {requestId} and is only for you, you can use it to check the status of payment. If user request or need to pay manually you can provide the following url : {payLink}"
         else:
-            returnString = f"URL for payment to send to the client :  {signUpAndPayLink} . ID of the invoice is {invoice_ID} to be used to check the status of payment"
+            returnString = f"URL for payment to send to the client :  {payLink} . ID of the invoice is {requestId} to be used to check the status of payment"
        
         return returnString
 
