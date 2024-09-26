@@ -1,10 +1,9 @@
 import requests
 import json
-from datetime import datetime, timedelta
 import uuid
 import os
-from web3 import Web3
 import time
+
 # RequestFinance API key from environement variable 
 API_KEY = os.getenv("RequestFinance_Test_API_KEY")
 # Example payment receiver wallet address
@@ -22,49 +21,6 @@ HEADERS = {
     "Content-Type": "application/json",
     "Authorization": f"{API_KEY}"  # Sepolia Testnet with Test API , see https://docs.request.finance/testing
 }
-
-
-def computePaymentReference(salt, request_id,payment_receiver): 
-    """
-    computePaymentReference
-    -----------------------
-    Generates a unique payment reference by hashing the concatenation of the request ID, salt, and payment receiver address.
-
-    Parameters
-    ----------
-    salt : str
-        A random or predefined string used as additional entropy for generating the payment reference.
-    request_id : str
-        The unique identifier for the payment request (e.g., an invoice ID).
-    payment_receiver : str
-        The address of the receiver who will receive the payment (e.g. ETH address).
-
-    Returns
-    -------
-    str
-        The payment reference, represented as the last 8 bytes of the keccak-256 hash of the concatenated string, 
-        in hexadecimal format.
-
-    Notes
-    -----
-    - The `request_id`, `salt`, and `payment_receiver` are concatenated into a single string (all in lowercase) 
-      before being hashed.
-    - The keccak-256 hashing algorithm is used
-    - Only the last 8 bytes of the hash are used for the payment reference, which is then converted to a hexadecimal string.
-
-    Example
-    -------
-    payment_reference = computePaymentReference(
-        salt="random_salt_value",
-        request_id="unique_request_id",
-        payment_receiver="0xReceiverAddress"
-    )
-    """
-    concat_str = (request_id + salt + payment_receiver).lower()
-    hash_value = Web3.keccak(text=concat_str)
-    payment_reference = hash_value[-8:]
-    payment_reference_hex = payment_reference.hex()
-    return payment_reference_hex
 
 
 def GeneratePayload(clientInfo, currency, price, serviceName = None): 
@@ -138,9 +94,6 @@ def GeneratePayload(clientInfo, currency, price, serviceName = None):
                 # "lastName": "Doe",
             },
         },
-        # "paymentTerms": {
-        #     "dueDate": (datetime.utcnow() + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")  # Date d'échéance dans 7 jours
-        # },
         "paymentAddress": paymentReceiverAddress,  # Adress which will receive the payment
         "expectedAmount": str(int(price * 10**18)),
         "currency": "ETH-sepolia", 
@@ -149,7 +102,6 @@ def GeneratePayload(clientInfo, currency, price, serviceName = None):
     return invoice_payload
 
      
-
 def Send_invoice(invoice_payload):
     """
     Send_invoice
@@ -176,15 +128,22 @@ def Send_invoice(invoice_payload):
     If any of the requests fail, the function returns None.
     """
     # Post request for  Off-Chain Invoice Creation 
+
+    print(invoice_payload)
     response = requests.post(InvoiceEndpoint, headers=HEADERS, data=json.dumps(invoice_payload))
+        
 
     if response.status_code == 201:
         response_data = response.json()
         requestId=response_data.get("id")
         paymentReference=response_data.get("paymentReference")
         return 'https://invoicing.request.network/', requestId, paymentReference;
+    if response.status_code == 400:
+        error_message = response.json().get("error", "Unknown error")
+        print(f"Error 400: {error_message}")
+        return None, None, None
     else:
-        return None #f"Error during the creation of the invoice, please check the inputs. Error was : {response.content}"
+        return None,None,None #f"Error during the creation of the invoice, please check the inputs. Error was : {response.content}"
 
 
 def GenerateAndSendInvoice(clientInfo_Email, clientInfo_identity_address, currency, price, serviceName, autoPayment):
@@ -269,10 +228,6 @@ def GenerateAndSendInvoice(clientInfo_Email, clientInfo_identity_address, curren
             returnString = f"URL for payment to send to the client :  {payLink} . ID of the invoice is {requestId} to be used to check the status of payment"
        
         return returnString
-
-
-import time
-import requests
 
 
 def CheckInvoiceStatus(ID, waitingTime):
