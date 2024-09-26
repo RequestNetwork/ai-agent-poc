@@ -20,7 +20,7 @@ in the following, all the required key could be saved in your system environemen
 
 1) A Request Finance account and an API Test key
 2) An OpenAI API Key and a positive credit balance (to make api calls) 
-2) A MetaMask wallet with two addresses one for the payment of invoice and the other to receive the funds. you will also need your metamask account private key.
+2) An Ethereum wallet with two addresses one for the payment of invoice and the other to receive the funds. you will also need your metamask account private key.
 3) An Infura URL for Sepolia network and your api key
  
 Before starting the web_interface.py, start your Redis server.  
