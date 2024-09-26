@@ -38,7 +38,10 @@ const payee = signatureProvider.addSignatureParameters(payeeSignatureInfo);
 
 const requestNetwork = new RequestNetwork({
   signatureProvider,
-  useMockStorage: true, // TODO SWITCH TO SEPOLIA later
+  // useMockStorage: true, // TODO SWITCH TO SEPOLIA later
+  nodeConnectionConfig: { 
+    baseURL: 'https://sepolia.gateway.request.network/' 
+  },
   paymentOptions: {
     getSubgraphClient: (chain: string) => {
       // Ternary because cannot dynamically access environment variables in the browser
