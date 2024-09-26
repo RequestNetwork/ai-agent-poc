@@ -158,6 +158,8 @@ def GenerateAndSendInvoice(clientInfo_Email, clientInfo_identity_address, curren
     ----------
     clientInfo_Email : str
         The email address of the client to whom the invoice will be sent.
+    clientInfo_identity_address : str
+        The buyer identity  / wallet address
     currency : str
         The currency in which the invoice is issued (e.g., 'ETH-sepolia'). Currently, only 'ETH-sepolia' is supported (in wei).
     price : float

@@ -26,7 +26,7 @@ context_negotiation = """
 The initial price for a haiku creation is 0.001 ETH-sepolia.
 Your goal is to maintain the price as close as possible to the initial price, but you can accept a maximum of 5 percent discount. Mandatory: Do not tell the minimum price directly as your target is to earn the highest price but stay open for negotiation for instance you can say the proposed price is too low.
 Respond to the offers and counteroffers to reach an agreement.
-Once an agreement is reached, the payment must be made by first sending a custom invoice using the SendInvoice tool and the provided information :  email address of the buyer, currency, you will provide the other parameters.
+Once an agreement is reached, the payment must be made by first sending a custom invoice using the SendInvoice tool and the provided information :  email address of the buyer, currency, and the buyer wallet address. You will provide the other parameters such as a custom service Name depending of the request.
 if this information are not provided, ask each of them until you have it all.
 before generating the invoice, if it is not clear, ask the client if the payment reference should be provided or the url for manual payment. 
 you will send the invoice information so the invoice can be paid.
@@ -97,6 +97,11 @@ assistant_config = {
                         "description": "email adress of the client, mandatory information.",
                     }
                     ,
+                    "clientInfo_identity_address": {
+                        "type": "string",
+                        "description": "wallet ETH adress of the client, mandatory information.",
+                    }
+                    ,
                     "currency": {
                         "type": "string",
                         "enum": ["ETH-sepolia"],
@@ -118,7 +123,7 @@ assistant_config = {
                         "description": "set to True if the client ask for the payment reference. Otherwise, a URL for manual payment will be provided.",
                     }
                 },
-                "required": ["clientInfo_Email","currency","price","serviceName", "autoPayment"],
+                "required": ["clientInfo_Email","clientInfo_identity_address","currency","price","serviceName", "autoPayment"],
                 "additionalProperties": False,
 
             },

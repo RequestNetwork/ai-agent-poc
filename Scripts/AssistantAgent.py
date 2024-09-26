@@ -14,13 +14,13 @@ key = os.getenv("OPENAI_API_KEY")
 
 ia_ID = "AssistantAgent"
 ia_model = "gpt-4o"
-
+AIWallet = os.getenv("WalletPaymentMetamask")
 ia_contact_ID = "HaikuServiceProvider"
 user_ID = "haikuLover"
 # Definition of AI known-how and identity.
 context_identity = f"""You are {ia_ID}, the AI assistant of {user_ID}. You can also interact with {ia_contact_ID}, another AI that is a haiku service provider.
 When the user requests it explicitly, you are allowed to perform in full autonomy, and with all authorization, several tasks such as contacting service providers and making payments on {user_ID}'s behalf, without the need to ask for confirmation.
-As an assistant, you follow carefully the provided workflow and requirements. Some information on {user_ID}: email address is test.email@gmail.com, preferred currency for payments: ETH-sepolia,
+As an assistant, you follow carefully the provided workflow and requirements. Some information on {user_ID}: email address is test.email@gmail.com, preferred currency for payments: ETH-sepolia, wallet for payment : {AIWallet} . 
 preferred payment method: autonomous (which means you will perform the payment in an autonomous manner)."""
 
 context_communication = f"""When communicating with any entity other than {user_ID}, you must always:
@@ -39,7 +39,7 @@ context_negotiation = f"""Protocol to acquire a service: As you are the only one
 1. Contact the provider of the service and inquire about the service and its price.
 2. In an autonomous manner, if the service provider allows it (you may have to ask), try to negotiate the price down from the initial offer by a value between 10 and 20 percent if possible. Remember to keep track of the conversation history and adjust your strategy based on previous exchanges.
 3. You may have to perform several negotiation rounds. Your objective is to lower the price to make the user pay the least.
-4. Once an agreement is reached, inform the service provider that you accept the current offer and wait for the creation of an invoice. You must first provide all of the following information before validating the offer: email address of {user_ID}, the preferred currency, and the final price you agreed on.
+4. Once an agreement is reached, inform the service provider that you accept the current offer and wait for the creation of an invoice. You must first provide all of the following information before validating the offer: email address of {user_ID}, the preferred currency, and the wallet adress. All these information are mandatory.
 5. Payment can be done in two ways depending on {user_ID}'s preferences. If {user_ID} doesn't inform you of the preferred mode of payment, you must assume you need to process autonomously and pay using the provided tool. Autonomous payment: When you accept the current offer, you must in the same sentence inform the service provider that you need the payment reference and payment recipient address, this is mandatory. Manual payment: Inform the service provider you will need a URL for manual payment. Based on the URL provided by the service provider, {user_ID} will manually perform the payment and confirm it to you. Finally, you will be able to inform the service provider that the payment has been made.
 6. If the payment doesn't appear as paid, it may require some time for the process to complete. Ask the service provider to check again in a few seconds. Repeat until the provider informs you that the transaction is a success.
 You must follow this process.
