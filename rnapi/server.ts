@@ -13,15 +13,15 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 // Environment variables
-// TODO const API_KEY = process.env.RequestFinance_Test_API_KEY;
+const API_KEY = process.env.RequestNetwork_API_KEY;
+
 
 // Middleware for API key authentication
 const authenticateApiKey = (req: Request, res: Response, next: Function) => {
-  // TODO:
-  // const apiKey = req.header('Authorization');
-  // if (apiKey !== API_KEY) {
-  //   return res.status(401).json({ error: 'Unauthorized' });
-  // }
+  const apiKey = req.header('Authorization');
+  if (apiKey !== API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   next();
 };
 
@@ -38,7 +38,6 @@ const payee = signatureProvider.addSignatureParameters(payeeSignatureInfo);
 
 const requestNetwork = new RequestNetwork({
   signatureProvider,
-  // useMockStorage: true, // TODO SWITCH TO SEPOLIA later
   nodeConnectionConfig: { 
     baseURL: 'https://sepolia.gateway.request.network/' 
   },

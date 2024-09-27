@@ -1,6 +1,6 @@
 ﻿# AI-KU Project
 
-AIs Interaction Project for Autonomous Service Negotiation, Invoice generation and Payment Using Request Finance API
+AIs Interaction Project for Autonomous Service Negotiation, Invoice generation and Payment Using a simple Request Network API
 
 ![conversationSample](https://github.com/user-attachments/assets/78a3f30e-4561-45a2-a7db-03f4a4013817)
 
@@ -18,7 +18,7 @@ Redis for windows is available through the microsoft archive on github : https:/
 To run these scripts in the same condition, you will need several prerequisites: 
 in the following, all the required key could be saved in your system environement variables. All required key and values will be indicated in the scripts by the os.getenv function call. 
 
-1) A Request Finance account and an API Test key
+1) Set up the env variable `RequestNetwork_API_KEY = ""` for the Request Network Auth
 2) An OpenAI API Key and a positive credit balance (to make api calls) 
 2) An Ethereum wallet with two addresses one for the payment of invoice and the other to receive the funds. you will also need your metamask account private key.
 3) An Infura URL for Sepolia network and your api key

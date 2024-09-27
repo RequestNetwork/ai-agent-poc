@@ -4,22 +4,22 @@ import uuid
 import os
 import time
 
-# RequestFinance API key from environement variable 
-API_KEY = os.getenv("RequestFinance_Test_API_KEY")
+# Request Network API key from environement variable 
+API_KEY = os.getenv("RequestNetwork_API_KEY")
+
 # Example payment receiver wallet address
 paymentReceiverAddress= os.getenv("paymentReceiverAddress")
-# Base URL Request Finance API - used for the POST / GET methods
-# BASE_URL = "https://api.request.finance/"
+
+# Base URL used for the request network POST / GET methods 
 BASE_URL = "http://localhost:3000/"
 
 # Invoice creation access point
 InvoiceEndpoint = f"{BASE_URL}invoices"
 
-# Mandatory Headers for identification and network selection,  see https://docs.request.finance/getting-started
 HEADERS = {
     "Accept": "application/json",
     "Content-Type": "application/json",
-    "Authorization": f"{API_KEY}"  # Sepolia Testnet with Test API , see https://docs.request.finance/testing
+    "Authorization": f"{API_KEY}"
 }
 
 
@@ -27,10 +27,8 @@ def GeneratePayload(clientInfo, currency, price, serviceName = None):
     """
     GeneratePayload
     ---------------
-    Generates a payload (dictionary) for invoice creation with the Request Finance API. 
+    Generates a payload (dictionary) for invoice creation with the Request Network API. 
     This function prepares the necessary and mandatory parameters required to generate an invoice.
-
-    Conforms to the documentation as of 17/08/2024: https://docs.request.finance/invoices
 
     Parameters
     ----------
@@ -49,7 +47,7 @@ def GeneratePayload(clientInfo, currency, price, serviceName = None):
     -------
     dict
         A dictionary (`invoice_payload`) containing all the necessary fields for invoice creation, 
-        ready to be sent to the Request Finance API.
+        ready to be sent to the Request Network API.
 
     Notes
     -----
@@ -106,12 +104,12 @@ def Send_invoice(invoice_payload):
     """
     Send_invoice
     ------------
-    Function to deploy an invoice using the Request Finance API.
+    Function to deploy an invoice using the Request Network API.
 
     Parameters
     ----------
     invoice_payload : dict
-        A dictionary containing the payload of the invoice. It must follow the format required by the Request Finance API.
+        A dictionary containing the payload of the invoice. It must follow the format required by the Request Network API.
     
     Returns
     -------
@@ -150,7 +148,7 @@ def GenerateAndSendInvoice(clientInfo_Email, clientInfo_identity_address, curren
     """
     GenerateAndSendInvoice
     ----------------------
-    Main function to generate and send an invoice using the Request Finance API. 
+    Main function to generate and send an invoice using the Request Network API. 
     It creates the payload, sends the invoice, and returns either a payment reference for automated payment 
     or a URL for manual payment, depending on the autoPayment flag.
 
@@ -218,13 +216,6 @@ def GenerateAndSendInvoice(clientInfo_Email, clientInfo_identity_address, curren
         return "error in generating invoice, verify your data and try again"
     else: 
         if autoPayment:
-            # ServerResponseWithReference = requests.get( "https://api.request.finance/invoices/"+str(requestId)+"?withRequest=true", headers = HEADERS)
-            # invoice_data = ServerResponseWithReference.json()
-            # salt = invoice_data["request"]["requestInput"]["payment"]["salt"]
-            # request_id = invoice_data.get("requestId")
-            # payment_receiver =  paymentReceiverAddress
-            # payment_reference_hex =  computePaymentReference(salt, request_id, payment_receiver)
-
             returnString = f"the client can use this payment Reference to perform payment: {paymentReference} to the following address {paymentReceiverAddress}. ID of the invoice is {requestId} and is only for you, you can use it to check the status of payment. If user request or need to pay manually you can provide the following url : {payLink}"
         else:
             returnString = f"URL for payment to send to the client :  {payLink} . ID of the invoice is {requestId} to be used to check the status of payment"
@@ -236,7 +227,7 @@ def CheckInvoiceStatus(ID, waitingTime):
     """
     CheckInvoiceStatus
     ------------------
-    This function checks the current status of an invoice via the Request Finance API.
+    This function checks the current status of an invoice via the Request Network API.
     
     Parameters
     ----------
