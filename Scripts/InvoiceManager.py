@@ -11,6 +11,7 @@ API_KEY = os.getenv("RequestNetwork_API_KEY")
 paymentReceiverAddress= os.getenv("paymentReceiverAddress")
 
 # Base URL used for the request network POST / GET methods 
+# Require to start the Node server
 BASE_URL = "http://localhost:3000/"
 
 # Invoice creation access point
@@ -194,26 +195,38 @@ def GenerateAndSendInvoice(clientInfo_Email, clientInfo_identity_address, curren
     """
     clientInfo = {}
     if clientInfo_Email is None :
-        return "Email of the client is missing"
+        errorMsg = "Email of the client is missing"
+        print(errorMsg)
+        return errorMsg
+        
     else: 
         clientInfo["email"]  =  clientInfo_Email
 
     if clientInfo_identity_address is None :
-        return "Identity address of the client is missing"
+        errorMsg = "Identity address of the client is missing"
+        print(errorMsg)
+        return errorMsg
     else: 
         clientInfo["identity-address"]  =  clientInfo_identity_address
 
     if currency is None :
-        return "Currency information is missing. value is commonly ETH"
+        errorMsg = "Currency information is missing. value is commonly ETH"
+        print(errorMsg)
+        return errorMsg
     if price is None :
-        return "A service price in ETH is required"
+        errorMsg = "A service price in ETH is required"
+        print(errorMsg)
+        return errorMsg
     
-    
+    print("Generating Invoice payload...")
     invoice_payload = GeneratePayload(clientInfo, currency, price, serviceName)
+    print("Sending Invoice...")
     payLink, requestId, paymentReference = Send_invoice(invoice_payload)
     
     if payLink is None: 
-        return "error in generating invoice, verify your data and try again"
+        errorMsg = "error in generating invoice, verify your data and try again"
+        print(errorMsg)
+        return errorMsg
     else: 
         if autoPayment:
             returnString = f"the client can use this payment Reference to perform payment: {paymentReference} to the following address {paymentReceiverAddress}. ID of the invoice is {requestId} and is only for you, you can use it to check the status of payment. If user request or need to pay manually you can provide the following url : {payLink}"
@@ -264,11 +277,15 @@ def CheckInvoiceStatus(ID, waitingTime):
                     "the waiting time before the next check.")
         else:
             # Return an error message in case of a non-200 response
-            return f"Error fetching invoice status. Server responded with status code {ServerResponse.status_code}."
+            errorMsg = f"Error fetching invoice status. Server responded with status code {ServerResponse.status_code}."
+            print(errorMsg)
+            return errorMsg
 
     except requests.RequestException as e:
         # Catch any errors during the request
-        return f"An error occurred while checking the invoice status: {e}"
+        errorMsg = f"An error occurred while checking the invoice status: {e}"
+        print(errorMsg)
+        return errorMsg
 
 if __name__ == "__main__":
     pass
