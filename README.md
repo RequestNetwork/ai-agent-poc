@@ -35,4 +35,4 @@ Enjoy !
 
 ## Acknowledgements
 
-This project was initially developed in a [private repository](https://github.com/EchoOfHaiku/AI-KU) by @Doctatur with contributions from @vrolland on behalf of the Request Network Foundation.
+This project was initially developed in a [private repository](https://github.com/EchoOfHaiku/AI-KU) by [@Doctatur](https://github.com/Doctatur) with contributions from [@vrolland](https://github.com/vrolland) on behalf of the [Request Network Foundation](https://github.com/RequestNetwork) in September 2024.
