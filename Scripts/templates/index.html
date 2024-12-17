@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-KU Project Logs</title>
+    <style>
+        /* Global Title Style */
+        h1.global-title {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Style for AssistantAgent messages */
+        .AssistantAgent {
+            color: blue !important;
+            font-weight: bold;
+        }
+
+        /* Style for HaikuServiceProvider messages */
+        .HaikuServiceProvider {
+            color: green !important;
+            font-weight: bold;
+        }
+
+        /* Style for USER messages */
+        .USER {
+            color: rgb(255, 0, 17) !important;
+        }
+
+        /* Style for haikuLover messages */
+        .haikuLover {
+            color: rgb(255, 0, 0) !important;
+            font-weight: bold !important; 
+        }
+
+        /* Width of message input field */
+        #message {
+            width: 500px; /* Set the desired width here */
+        }
+
+        /* Container for the legend explaining agent colors */
+        #legend-container {
+            margin: 20px auto;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* Style for the legend box */
+        #legend {
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* Style for the toggle legend button */
+        #toggle-legend {
+            background-color: #007BFF;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Remove focus outline from toggle button when clicked */
+        #toggle-legend:focus {
+            outline: none;
+        }
+
+        /* Style for the legend title */
+        #legend h3 {
+            margin-top: 0;
+        }
+
+        /* Remove bullet points from the legend list */
+        #legend ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        /* Space between legend items */
+        #legend li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main title of the page -->
+    <h1 class="global-title">AIs Interaction Project for Autonomous Service Negotiation, Invoice generation and Payment Using Request Network API</h1>
+
+    <!-- Legend section, hidden by default and shown with a toggle button -->
+    <div id="legend-container">
+        <div id="legend" style="display: none;">
+            <h3>Legend</h3>
+            <ul>
+                <li><span class="AssistantAgent">AssistantAgent</span>: The assistant providing responses</li>
+                <li><span class="HaikuServiceProvider">HaikuServiceProvider</span>: The service provider for Haikus</li>
+                <li><span class="haikuLover">haikuLover</span>: The person interacting with the agents</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Form to send a message -->
+    <form id="messageForm">
+        <label for="message">Message:</label>
+        <input type="text" id="message" name="message"><br><br>
+        <button type="submit">Send</button>
+    </form>
+
+    <!-- Button to clear conversation logs -->
+    <button id="clearLog">Clear Logs</button>
+
+    <!-- Button to toggle the legend visibility -->
+    <button id="toggle-legend">Show Legend</button>
+
+    <!-- Section for displaying conversation logs -->
+    <h1>Conversation Logs</h1>
+    <div id="logs"></div>
+
+    <!-- JavaScript code for managing interactions -->
+    <script>
+        /**
+         * fetchLogs
+         * ---------
+         * Fetches the latest conversation logs from the server via a GET request to the '/logs' endpoint,
+         * and updates the UI with the fetched logs.
+         *
+         * The logs are reversed to display the most recent logs at the top. It applies styles to the agent names
+         * and detects URLs, converting them into clickable links.
+         *
+         * Returns:
+         * --------
+         * None (updates the DOM with the fetched logs)
+         */
+        async function fetchLogs() {
+            const response = await fetch('/logs');
+            const logs = await response.json();
+            const logsDiv = document.querySelector('#logs');
+            logsDiv.innerHTML = ''; // Clear previous logs
+
+            logs.reverse(); // Reverse the logs to show the latest on top
+
+            logs.forEach(log => {
+                const logItem = document.createElement('p');
+
+                // Wrap the agent name in a span with the corresponding class for styling
+                const agentNameSpan = `<span class="${log.agent}">${log.agent}</span>`;
+
+                // Format the message with colored agent names
+                let formattedMessage = log.message;
+                const agents = ["AssistantAgent", "HaikuServiceProvider", "USER", "haikuLover"];
+
+                // Replace agent names in the message with the correct CSS classes
+                agents.forEach(agent => {
+                    const regex = new RegExp(agent, 'g');
+                    formattedMessage = formattedMessage.replace(regex, `<span class="${agent}">${agent}</span>`);
+                });
+
+                // Detect URLs and make them clickable
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                formattedMessage = formattedMessage.replace(urlRegex, '<a href="$1" target="_blank">Request Finance Link to sign and pay</a>');
+
+                // Add the formatted message to the log item
+                logItem.innerHTML = `${log.timestamp}: ${agentNameSpan} - ${formattedMessage}`;
+                logsDiv.appendChild(logItem);
+            });
+        }
+
+        /**
+         * toggleLegend
+         * ------------
+         * Toggles the visibility of the legend that explains the color codes for the different agents.
+         * It shows or hides the legend based on the current state.
+         *
+         * Returns:
+         * --------
+         * None (updates the legend visibility in the DOM)
+         */
+        document.getElementById('toggle-legend').addEventListener('click', function() {
+            const legend = document.getElementById('legend');
+            if (legend.style.display === 'none') {
+                legend.style.display = 'block';
+                this.textContent = 'Hide Legend';
+            } else {
+                legend.style.display = 'none';
+                this.textContent = 'Show Legend';
+            }
+        });
+
+        /**
+         * ClearLog
+         * --------
+         * Sends a POST request to the '/clearlog' endpoint to clear the conversation logs.
+         * This function is triggered when the "Clear Logs" button is clicked.
+         *
+         * Returns:
+         * --------
+         * None (sends a request to the server)
+         */
+        async function ClearLog() {
+            const response = await fetch('/clearlog', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: 'clear log' }),
+            });
+            const result = await response.json();
+            // Optionally log the result to the console
+            // console.log(result);
+        }
+
+        // Attach the ClearLog function to the "Clear Logs" button
+        document.querySelector('#clearLog').addEventListener('click', ClearLog);
+
+        /**
+         * messageForm submit handler
+         * --------------------------
+         * Handles the form submission when the user sends a message.
+         * It sends the message to the '/start' endpoint and then fetches the updated logs.
+         *
+         * Returns:
+         * --------
+         * None (updates the logs after sending the message)
+         */
+        document.querySelector('#messageForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent the default form submission behavior
+            const message = document.querySelector('#message').value;
+
+            // Send the message to the '/start' endpoint via POST request
+            const response = await fetch('/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            });
+
+            // Fetch and display updated logs
+            fetchLogs();
+        });
+
+        // Periodically fetch logs every 2 seconds to update the interface in real-time
+        setInterval(fetchLogs, 2000);
+    </script>
+</body>
+</html>
