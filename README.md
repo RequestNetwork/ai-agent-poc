@@ -32,3 +32,7 @@ It may happens that the communication protocol between AI may not be respected, 
 All the transaction are executed on the Sepolia testnet, a testing network for Ethereum.
 
 Enjoy !
+
+## Acknowledgements
+
+This project was initially developed in a [private repository](https://github.com/EchoOfHaiku/AI-KU) by @Doctatur with contributions from @vrolland on behalf of the Request Network Foundation.
