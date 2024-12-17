@@ -1,6 +1,5 @@
-﻿# AI-KU Project
-
-AIs Interaction Project for Autonomous Service Negotiation, Invoice generation and Payment Using a simple Request Network API
+# Proof of Concept: AI Agent using Request Network
+Proof of Concept of AIs Interaction for Autonomous Service Negotiation, Invoice generation and Payment Using a simple Request Network API
 
 ![conversationSample](https://github.com/user-attachments/assets/78a3f30e-4561-45a2-a7db-03f4a4013817)
 
@@ -12,24 +11,24 @@ pyautogen-0.2.33 (pip install --upgrade pyautogen) <br />
 openai-1.40.0 (pip install --upgrade openai) <br />
 pip install openai_multi_tool_use_parallel_patch <br />
 
-## NOTES: 
+## NOTES:
 Redis for windows is available through the microsoft archive on github : https://github.com/microsoftarchive/redis/releases , I have used the version 3.0.504
 
-To run these scripts in the same condition, you will need several prerequisites: 
-in the following, all the required key could be saved in your system environement variables. All required key and values will be indicated in the scripts by the os.getenv function call. 
+To run these scripts in the same condition, you will need several prerequisites:
+in the following, all the required key could be saved in your system environement variables. All required key and values will be indicated in the scripts by the os.getenv function call.
 
 1) Set up the env variable `RequestNetwork_API_KEY = ""` for the Request Network Auth
-2) An OpenAI API Key and a positive credit balance (to make api calls) 
+2) An OpenAI API Key and a positive credit balance (to make api calls)
 2) An Ethereum wallet with two addresses one for the payment of invoice and the other to receive the funds. you will also need your metamask account private key.
 3) An Infura URL for Sepolia network and your api key
- 
-Before starting the web_interface.py, start your Redis server.  
-then start the two agent flask web servers AssistantAgent and ServiceProviderAgent. 
 
-Using you web browser, go to the web_interface url  to access the interface. 
+Before starting the web_interface.py, start your Redis server.
+then start the two agent flask web servers AssistantAgent and ServiceProviderAgent.
 
-It may happens that the communication protocol between AI may not be respected, restarting the script should be sufficient to solve the issue. 
+Using you web browser, go to the web_interface url  to access the interface.
 
-All the transaction are executed on the Sepolia testnet, a testing network for Ethereum. 
+It may happens that the communication protocol between AI may not be respected, restarting the script should be sufficient to solve the issue.
 
-Enjoy ! 
+All the transaction are executed on the Sepolia testnet, a testing network for Ethereum.
+
+Enjoy !
