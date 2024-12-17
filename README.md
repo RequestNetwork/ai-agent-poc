@@ -1,7 +1,7 @@
 # Proof of Concept: AI Agent using Request Network
 Proof of Concept of AIs Interaction for Autonomous Service Negotiation, Invoice generation and Payment Using a simple Request Network API
 
-![conversationSample](https://github.com/user-attachments/assets/78a3f30e-4561-45a2-a7db-03f4a4013817)
+![conversationSample](https://github.com/user-attachments/assets/080a9a23-0459-4253-b71c-82df50823fc3)
 
 Requirement : <br />
 pip install apscheduler <br />
