@@ -7,7 +7,7 @@ Requirement : <br />
 pip install apscheduler <br />
 Redis 5.0.7 (pip install redis)   :  DB server used for communication between AIs and user , require additionnal downloads to run the Redis server.  <br />
 tenacity-9.0.0 (pip install tenacity) <br />
-pyautogen-0.2.33 (pip install --upgrade pyautogen) <br />
+ag2-0.2.33 (pip install --upgrade ag2) <br />
 openai-1.40.0 (pip install --upgrade openai) <br />
 pip install openai_multi_tool_use_parallel_patch <br />
 
